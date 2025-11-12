@@ -1,0 +1,81 @@
+{
+  "name": "sagemaker-remote-connection",
+  "displayName": "SageMaker Remote Connection",
+  "description": "Connect Cursor to AWS SageMaker Studio JupyterLab instances via Remote-SSH",
+  "version": "1.0.0",
+  "publisher": "dream-flow",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other",
+    "Remote"
+  ],
+  "keywords": [
+    "aws",
+    "sagemaker",
+    "jupyter",
+    "notebook",
+    "remote",
+    "ssh"
+  ],
+  "activationEvents": [
+    "onCommand:sagemaker-remote.connect"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "sagemaker-remote.connect",
+        "title": "Connect to SageMaker",
+        "category": "SageMaker"
+      },
+      {
+        "command": "sagemaker-remote.checkStatus",
+        "title": "Check SageMaker Connection Status",
+        "category": "SageMaker"
+      },
+      {
+        "command": "sagemaker-remote.setup",
+        "title": "Setup SageMaker Connection",
+        "category": "SageMaker"
+      }
+    ],
+    "configuration": {
+      "title": "SageMaker Remote Connection",
+      "properties": {
+        "sagemakerRemote.spaceArn": {
+          "type": "string",
+          "default": "",
+          "description": "SageMaker Space ARN (e.g., arn:aws:sagemaker:us-east-1:123456789012:space/d-xxx/space-name)"
+        },
+        "sagemakerRemote.region": {
+          "type": "string",
+          "default": "us-east-1",
+          "description": "AWS Region"
+        },
+        "sagemakerRemote.sshHostAlias": {
+          "type": "string",
+          "default": "sagemaker",
+          "description": "SSH host alias in SSH config"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2"
+  }
+}
+
