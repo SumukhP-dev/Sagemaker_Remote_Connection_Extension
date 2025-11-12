@@ -69,13 +69,12 @@
     "package": "vsce package"
   },
   "devDependencies": {
-    "@types/vscode": "^1.80.0",
     "@types/node": "^18.0.0",
-    "typescript": "^5.0.0",
-    "@vscode/vsce": "^2.22.0"
+    "@types/vscode": "^1.80.0",
+    "@vscode/vsce": "^2.32.0",
+    "typescript": "^5.0.0"
   },
   "dependencies": {
     "child_process": "^1.0.2"
   }
 }
-
