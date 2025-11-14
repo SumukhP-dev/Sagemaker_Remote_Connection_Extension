@@ -2,8 +2,8 @@
   "name": "sagemaker-remote-connection",
   "displayName": "SageMaker Remote Connection",
   "description": "Connect Cursor/VS Code to AWS SageMaker Studio JupyterLab notebooks via Remote-SSH. One-click connection to SageMaker instances with automatic setup.",
-  "version": "1.0.0",
-  "publisher": "dream-flow",
+  "version": "1.0.1",
+  "publisher": "SumukhP-dev",
   "repository": {
     "type": "git",
     "url": "https://github.com/SumukhP-dev/Sagemaker_Remote_Connection_Extension.git"
@@ -128,7 +128,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "vsce package"
+    "package": "vsce package --out releases/"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
