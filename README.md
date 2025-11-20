@@ -36,6 +36,10 @@ Before using this extension, ensure you have:
    - For VS Code: `ms-vscode-remote.remote-ssh`
 3. **AWS Toolkit Extension** installed (`amazonwebservices.aws-toolkit-vscode`)
 4. **AWS Credentials** configured (via `aws configure` or AWS Toolkit)
+5. **SageMaker Studio Space** with remote connections enabled:
+   - In AWS Console: SageMaker → Studio → Your Domain → Your Space
+   - Ensure "Remote Connection" or "VS Code Connection" is enabled for your Space
+   - You should see an "Open in VS Code" option available in the Space details
 
 ## Installation
 
@@ -61,13 +65,36 @@ This creates a `.vsix` file in the root directory.
 
 ### Quick Start (Recommended)
 
-The fastest way to connect:
+**Important Prerequisites**: Before running Quick Start, you must first start the local server:
 
-1. Open Command Palette (`F1`)
-2. Run: `SageMaker: Quick Start: Connect to SageMaker`
-3. Follow the prompts
+1. **Open VS Code Version from Website GUI**:
 
-This command automates the entire process: checks prerequisites, fixes common issues, verifies server status, and connects.
+   - Go to AWS Console → SageMaker → Studio → Your Domain → Your Space
+   - In the SageMaker Studio web interface, click on your Space
+   - Look for "Open in VS Code" or "Remote Connection" option in the Space details
+   - Click to open the VS Code version (this will launch VS Code/Cursor with a remote connection attempt)
+   - **Leave the Remote window open** even if it shows an error or fails to connect
+   - Wait ~10-15 seconds for the local server to start in the background
+
+2. **Try Connecting via AWS Toolkit Extension** (optional but recommended):
+
+   - In VS Code/Cursor, open AWS Toolkit sidebar (click AWS icon in left sidebar)
+   - Navigate to: SageMaker AI → Studio → Domain → SPACES
+   - Right-click your **Space** (NOT the app) → "Open Remote Connection" or "Connect"
+   - This will attempt to connect and help ensure the local server is running
+   - The connection may fail, but the local server should start in the background
+
+3. **Run Quick Start**:
+
+   - Open Command Palette (`F1`)
+   - Run: `SageMaker: Quick Start: Connect to SageMaker`
+   - Follow the prompts
+
+4. **Connect Manually**:
+   - When setup completes, connect manually:
+   - Press `F1` → `Remote-SSH: Connect to Host` → Select `sagemaker`
+
+**Note**: The Quick Start command automates the setup process: checks prerequisites, fixes common issues, verifies server status, and prepares everything for connection. However, the local server must be started first via AWS Toolkit as described above.
 
 ### Step-by-Step Setup
 
@@ -83,51 +110,57 @@ This command automates the entire process: checks prerequisites, fixes common is
 
 #### 2. Start Local Server
 
-**Important**: The local server must be running before connecting.
+**Important**: The local server must be running before connecting or running Quick Start.
 
-**Method 1: Using Extension Command**
+**Recommended Method: Open from Website GUI, then Connect via AWS Toolkit**
+
+1. **Open VS Code Version from SageMaker Studio Website**:
+
+   - Go to AWS Console → SageMaker → Studio → Your Domain → Your Space
+   - In the SageMaker Studio web interface, find your Space
+   - Click "Open in VS Code" or "Remote Connection" option
+   - This will launch VS Code/Cursor with a remote connection attempt
+   - **Leave the Remote window open** even if it shows an error or fails to connect
+   - Wait ~10-15 seconds for the local server to start in the background
+
+2. **Try Connecting via AWS Toolkit Extension**:
+   - In VS Code/Cursor, open AWS Toolkit sidebar (click AWS icon in left sidebar)
+   - Navigate to: SageMaker AI → Studio → Domain → SPACES
+   - Right-click your **Space** (NOT the app) → "Open Remote Connection" or "Connect"
+   - The connection may fail, but this helps ensure the local server is running
+   - You can close the Remote window once the server has started (the server continues running)
+
+**Alternative Method: Using Extension Command**
 
 - Press `F1` → `SageMaker: Start Local Server`
-
-**Method 2: Using AWS Toolkit UI**
-
-- Open AWS Toolkit sidebar (click AWS icon in left sidebar)
-- Navigate to: SageMaker AI → Studio → Domain → SPACES
-- Right-click your **Space** (NOT the app) → "Open Remote Connection"
-- Wait for server to start (5-10 seconds)
+- Note: This may not work if AWS Toolkit hasn't been initialized yet. Use the website GUI method above if this fails.
 
 #### 3. Connect to SageMaker
 
-1. Open Command Palette (`F1`)
-2. Run: `SageMaker: Connect to SageMaker`
-3. The extension will:
-   - Verify prerequisites
-   - Check server status
-   - Initiate Remote-SSH connection
+After setup is complete, connect manually using Remote-SSH:
 
-### Alternative: Direct Remote-SSH
+1. Press `F1` (or `Ctrl+Shift+P`)
+2. Type: `Remote-SSH: Connect to Host`
+3. Select `sagemaker` from the list (or type it if it doesn't appear)
 
-After setup, you can also connect directly:
-
-- Press `F1` → `Remote-SSH: Connect to Host` → `sagemaker`
+The connection will establish via SSH using the configured proxy command.
 
 ## Available Commands
 
 All commands are accessible via Command Palette (`F1` → type "SageMaker"):
 
-| Command                               | Description                                |
-| ------------------------------------- | ------------------------------------------ |
-| **Quick Start: Connect to SageMaker** | Automated connection process (recommended) |
-| **Connect to SageMaker**              | Connect to SageMaker via Remote-SSH        |
-| **Check SageMaker Connection Status** | Verify prerequisites and server status     |
-| **Setup SageMaker Connection**        | Initial setup wizard                       |
-| **Start Local Server**                | Attempt to start the local server          |
-| **Diagnose Connection**               | Comprehensive diagnostics report           |
-| **Debug SSH Config**                  | Detailed SSH config analysis               |
-| **Fix ARN Conversion**                | Fix ARN conversion in connection script    |
-| **Fix Code Wrapper**                  | Fix code command wrapper for Cursor        |
-| **Fix SSH Config**                    | Fix common SSH config issues               |
-| **Apply All Fixes**                   | Apply all available fixes at once          |
+| Command                               | Description                                                                                       |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Quick Start: Connect to SageMaker** | Automated setup process (recommended) - prepares everything, then connect manually via Remote-SSH |
+| **Check SageMaker Connection Status** | Verify prerequisites and server status                                                            |
+| **Setup SageMaker Connection**        | Initial setup wizard                                                                              |
+| **Start Local Server**                | Attempt to start the local server                                                                 |
+| **Diagnose Connection**               | Comprehensive diagnostics report                                                                  |
+| **Debug SSH Config**                  | Detailed SSH config analysis                                                                      |
+| **Fix ARN Conversion**                | Fix ARN conversion in connection script                                                           |
+| **Fix Code Wrapper**                  | Fix code command wrapper for Cursor                                                               |
+| **Fix SSH Config**                    | Fix common SSH config issues                                                                      |
+| **Apply All Fixes**                   | Apply all available fixes at once                                                                 |
 
 ## Configuration
 

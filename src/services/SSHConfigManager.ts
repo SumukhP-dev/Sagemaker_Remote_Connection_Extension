@@ -55,6 +55,9 @@ export class SSHConfigManager {
     ForwardAgent yes
     AddKeysToAgent yes
     StrictHostKeyChecking accept-new
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    ConnectTimeout 30
     ProxyCommand powershell.exe -NoProfile -Command "$env:SAGEMAKER_LOCAL_SERVER_FILE_PATH='${serverInfoPath}'; & '${ServerManager.getConnectionScriptPath()}' %h"
 `;
 
@@ -166,12 +169,61 @@ export class SSHConfigManager {
             if (scriptPathMatch) {
               const scriptPath = scriptPathMatch[1];
               outputChannel.appendLine(`Script path: ${scriptPath}`);
+              const scriptExists = fs.existsSync(scriptPath);
               outputChannel.appendLine(
-                `Script exists: ${fs.existsSync(scriptPath) ? "✅" : "❌"}`
+                `Script exists: ${scriptExists ? "✅" : "❌"}`
               );
+              
+              // Check for wrong editor path (Code vs Cursor)
+              if (!scriptExists) {
+                if (scriptPath.includes("Code\\User") || scriptPath.includes("Code/User")) {
+                  const cursorPath = scriptPath.replace(/Code\\User/g, "Cursor\\User").replace(/Code\/User/g, "Cursor/User");
+                  outputChannel.appendLine(`⚠️  CRITICAL: Script path points to VS Code instead of Cursor!`);
+                  outputChannel.appendLine(`   Current: ${scriptPath}`);
+                  outputChannel.appendLine(`   Should be: ${cursorPath}`);
+                  outputChannel.appendLine(`   Fix: Run 'SageMaker: Fix SSH Config' or update manually`);
+                }
+              }
+            }
+            
+            // Check for %n instead of %h
+            if (proxyCmd.includes("%n") && !proxyCmd.includes("%h")) {
+              outputChannel.appendLine(`⚠️  Issue: ProxyCommand uses %n instead of %h`);
+              outputChannel.appendLine(`   %n is the hostname alias, %h is the actual hostname`);
+              outputChannel.appendLine(`   Fix: Run 'SageMaker: Fix SSH Config'`);
+            }
+            
+            // Check if environment variable is set
+            if (!proxyCmd.includes("SAGEMAKER_LOCAL_SERVER_FILE_PATH")) {
+              outputChannel.appendLine(`⚠️  Issue: Missing SAGEMAKER_LOCAL_SERVER_FILE_PATH environment variable`);
+              outputChannel.appendLine(`   The ProxyCommand should set this variable`);
+              outputChannel.appendLine(`   Fix: Run 'SageMaker: Fix SSH Config'`);
             }
           }
           outputChannel.appendLine("");
+          
+          // Check for sm_* wildcard host issues
+          if (configContent.includes("Host sm_*")) {
+            outputChannel.appendLine("🔍 Checking sm_* wildcard host entry...\n");
+            const wildcardMatch = configContent.match(/Host sm_\*[\s\S]*?(?=Host |$)/i);
+            if (wildcardMatch) {
+              const wildcardSection = wildcardMatch[0];
+              
+              // Check for wrong editor path
+              if (wildcardSection.includes("Code\\User") || wildcardSection.includes("Code/User")) {
+                outputChannel.appendLine(`❌ CRITICAL: sm_* host uses VS Code path instead of Cursor!`);
+                outputChannel.appendLine(`   This will cause connection failures`);
+                outputChannel.appendLine(`   Fix: Update the path manually or delete this entry`);
+              }
+              
+              // Check for %n instead of %h
+              if (wildcardSection.includes("%n") && !wildcardSection.includes("%h")) {
+                outputChannel.appendLine(`⚠️  Issue: sm_* ProxyCommand uses %n instead of %h`);
+                outputChannel.appendLine(`   Fix: Update %n to %h in the ProxyCommand`);
+              }
+            }
+            outputChannel.appendLine("");
+          }
 
           // Try to validate with SSH (if available)
           try {
@@ -290,6 +342,16 @@ export class SSHConfigManager {
         fixedSection = fixedSection.replace(/%n/g, "%h");
         needsFix = true;
       }
+      
+      // Fix 1b: Check for wrong editor path (Code vs Cursor)
+      if (hostSection.includes("Code\\User") || hostSection.includes("Code/User")) {
+        outputChannel.appendLine(
+          "❌ CRITICAL: Found VS Code path instead of Cursor path!"
+        );
+        fixedSection = fixedSection.replace(/Code\\User/g, "Cursor\\User");
+        fixedSection = fixedSection.replace(/Code\/User/g, "Cursor/User");
+        needsFix = true;
+      }
 
       // Fix 2: Check environment variable is set
       const serverInfoPath = ServerManager.getServerInfoPath();
@@ -303,6 +365,27 @@ export class SSHConfigManager {
           /(ProxyCommand\s+)(.+)/,
           `$1powershell.exe -NoProfile -Command "$env:SAGEMAKER_LOCAL_SERVER_FILE_PATH='${serverInfoPath}'; & '$2' %h"`
         );
+        needsFix = true;
+      }
+
+      // Fix 3: Add timeout and keepalive settings if missing
+      if (!hostSection.includes("ServerAliveInterval")) {
+        outputChannel.appendLine(
+          "⚠️  Adding connection keepalive settings..."
+        );
+        // Add after StrictHostKeyChecking or before ProxyCommand
+        if (fixedSection.includes("StrictHostKeyChecking")) {
+          fixedSection = fixedSection.replace(
+            /(StrictHostKeyChecking\s+\S+\s*\n)/,
+            `$1    ServerAliveInterval 60\n    ServerAliveCountMax 3\n    ConnectTimeout 30\n`
+          );
+        } else {
+          // Add before ProxyCommand
+          fixedSection = fixedSection.replace(
+            /(ProxyCommand\s+)/,
+            `    ServerAliveInterval 60\n    ServerAliveCountMax 3\n    ConnectTimeout 30\n$1`
+          );
+        }
         needsFix = true;
       }
 

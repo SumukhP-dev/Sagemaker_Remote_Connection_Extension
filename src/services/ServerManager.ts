@@ -36,6 +36,29 @@ export class ServerManager {
   }
 
   /**
+   * Get the directory path for AWS Toolkit global storage
+   */
+  static getAwsToolkitStorageDir(): string {
+    return path.join(
+      process.env.APPDATA || "",
+      "Cursor",
+      "User",
+      "globalStorage",
+      "amazonwebservices.aws-toolkit-vscode"
+    );
+  }
+
+  /**
+   * Ensure the AWS Toolkit storage directory exists
+   */
+  static ensureStorageDirExists(): void {
+    const dir = this.getAwsToolkitStorageDir();
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  }
+
+  /**
    * Check if the local server is running and accessible
    */
   static async checkServerStatus(): Promise<ServerStatus> {
@@ -76,6 +99,14 @@ export class ServerManager {
     }
 
     return { running: false, error: "Server info file not found" };
+  }
+
+  /**
+   * Check if the server HTTP endpoint is ready to handle requests
+   * This is more thorough than just checking if the port is open
+   */
+  static async checkServerEndpointReady(port: number, maxRetries: number = 10, delayMs: number = 2000): Promise<boolean> {
+    return await ExecUtils.isHttpEndpointReady(port, maxRetries, delayMs);
   }
 
   /**

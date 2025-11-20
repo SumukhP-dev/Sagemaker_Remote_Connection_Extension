@@ -93,6 +93,11 @@
         "category": "SageMaker"
       },
       {
+        "command": "sagemaker-remote.fixPowerShellDebugOutput",
+        "title": "Fix PowerShell Debug Output",
+        "category": "SageMaker"
+      },
+      {
         "command": "sagemaker-remote.applyAllFixes",
         "title": "Apply All Fixes",
         "category": "SageMaker"
@@ -100,6 +105,21 @@
       {
         "command": "sagemaker-remote.quickStart",
         "title": "Quick Start: Connect to SageMaker",
+        "category": "SageMaker"
+      },
+      {
+        "command": "sagemaker-remote.cleanupRemoteServer",
+        "title": "Clean Up Remote Server",
+        "category": "SageMaker"
+      },
+      {
+        "command": "sagemaker-remote.monitorRemoteServer",
+        "title": "Monitor Remote Server (Real-time)",
+        "category": "SageMaker"
+      },
+      {
+        "command": "sagemaker-remote.quickStatusCheck",
+        "title": "Quick Status Check",
         "category": "SageMaker"
       }
     ],

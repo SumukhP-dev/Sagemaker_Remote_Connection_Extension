@@ -10,6 +10,8 @@ import { SSHConfigManager } from "./services/SSHConfigManager";
 import { DiagnosticsService } from "./services/DiagnosticsService";
 import { FixService } from "./services/FixService";
 import { QuickStartService } from "./services/QuickStartService";
+import { CleanupService } from "./services/CleanupService";
+import { MonitorService } from "./services/MonitorService";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("SageMaker Remote Connection extension is now active!");
@@ -78,6 +80,13 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  const fixPowerShellDebugOutputCommand = vscode.commands.registerCommand(
+    "sagemaker-remote.fixPowerShellDebugOutput",
+    async () => {
+      await FixService.fixPowerShellDebugOutput();
+    }
+  );
+
   const applyAllFixesCommand = vscode.commands.registerCommand(
     "sagemaker-remote.applyAllFixes",
     async () => {
@@ -92,6 +101,27 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  const cleanupRemoteServerCommand = vscode.commands.registerCommand(
+    "sagemaker-remote.cleanupRemoteServer",
+    async () => {
+      await CleanupService.cleanupRemoteServer("sagemaker");
+    }
+  );
+
+  const monitorRemoteServerCommand = vscode.commands.registerCommand(
+    "sagemaker-remote.monitorRemoteServer",
+    async () => {
+      await MonitorService.monitorRemoteServer("sagemaker");
+    }
+  );
+
+  const quickStatusCheckCommand = vscode.commands.registerCommand(
+    "sagemaker-remote.quickStatusCheck",
+    async () => {
+      await MonitorService.quickStatusCheck("sagemaker");
+    }
+  );
+
   context.subscriptions.push(
     connectCommand,
     checkStatusCommand,
@@ -102,9 +132,16 @@ export function activate(context: vscode.ExtensionContext) {
     fixArnConversionCommand,
     fixCodeWrapperCommand,
     fixSshConfigCommand,
+    fixPowerShellDebugOutputCommand,
     applyAllFixesCommand,
-    quickStartCommand
+    quickStartCommand,
+    cleanupRemoteServerCommand,
+    monitorRemoteServerCommand,
+    quickStatusCheckCommand
   );
 }
 
-export function deactivate() {}
+export function deactivate() {
+  // Clean up any active monitoring intervals
+  MonitorService.stopAllMonitoring();
+}
